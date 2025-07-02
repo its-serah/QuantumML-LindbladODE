@@ -16,7 +16,7 @@ def normalize(a):
 
 def get_state(theta, phi):
     ket0, ket1 = np.array([[1.],[0.]]), np.array([[0.],[1.]])
-    bloch_state = np.cos(theta/2) * ket0 + np.exp(np.complex(0, phi))*ket1
+    bloch_state = np.cos(theta/2) * ket0 + np.exp(complex(0, phi))*ket1
     return Qobj(bloch_state)
 
 def get_spherical(theta, phi):
@@ -184,29 +184,100 @@ def random_psi():
     return alpha, beta, rand_vector
 
 def two_qubit_initial(num):
+    """
+    Create a list of random two-qubit initial states with proper QuTiP tensor structure.
+    
+    Args:
+        num: Number of initial states to generate
+        
+    Returns:
+        List of random two-qubit states as QuTiP Qobj with dims=[[2,2],[1,1]]
+    """
     initial_states = []
     for i in range(num):
-        _, _, vec1 = random_psi()
-        _, _, vec2 = random_psi()
-        initial_states.append(Qobj(np.kron(vec1, vec2)))
+        alpha1, beta1, vec1 = random_psi()
+        alpha2, beta2, vec2 = random_psi()
+        
+        # Create the tensor product manually to ensure correct dimensions
+        # Tensor product of |ψ1⟩ ⊗ |ψ2⟩ is a vector of length 4
+        tensor_vec = np.kron(vec1, vec2)  # Direct Kronecker product of vectors
+        
+        # Create a Qobj with explicitly specified dimensions
+        two_qubit_state = Qobj(tensor_vec, dims=[[2, 2], [1, 1]])
+        
+        # Add the state to our list
+        initial_states.append(two_qubit_state)
+    
     return initial_states
 
 
 class TwoQubitDataset(Dataset):
     def __init__(self, omega=1, delta=1, J=1, num_batches=30, num_trajs=36, time_steps=300, stop=2, end=10):
-        sigmaz1, sigmaz2 = Qobj(np.kron(sigmaz(), np.eye(2))), Qobj(np.kron(np.eye(2), sigmaz()))
-        sigmax1, sigmax2 = Qobj(np.kron(sigmax(), np.eye(2))), Qobj(np.kron(np.eye(2), sigmax()))
-
+        """
+        Two-qubit dataset generator with proper tensor product dimensions.
+        
+        Args:
+            omega: Energy level splitting parameter
+            delta: Transverse field parameter
+            J: Coupling strength
+            num_batches: Number of parameter settings to use
+            num_trajs: Number of trajectories per batch
+            time_steps: Number of time steps
+            stop: Stop time for training subset
+            end: End time for full dataset
+        """
+        # Create the basis operators for a single qubit
+        sx = sigmax()
+        sy = sigmay()
+        sz = sigmaz()
+        id = qeye(2)
+        
+        # Create the tensor product operators with correct dimensions
+        sigmax1 = tensor(sx, id)  # sigmax ⊗ I
+        sigmax2 = tensor(id, sx)  # I ⊗ sigmax
+        sigmaz1 = tensor(sz, id)  # sigmaz ⊗ I
+        sigmaz2 = tensor(id, sz)  # I ⊗ sigmaz
+        
+        # Verify dimensions for operators
+        for op in [sigmax1, sigmax2, sigmaz1, sigmaz2]:
+            assert op.dims == [[2, 2], [2, 2]], f"Operator has incorrect dimensions: {op.dims}"
+        
         self.num_trajs = num_batches * num_trajs
         self.initial_states = two_qubit_initial(num_trajs)
         self.total_time_steps = np.linspace(0, end, time_steps)
-
+        
+        # Store operators for solver
+        self.e_ops = [sigmax1, sigmax2, sigmaz1, sigmaz2]
+        
         expect_data = []
+        # Verify state dimensions (QuTiP's default tensor dims are [[2,2], [1]])
+        assert self.initial_states[0].dims == [[2, 2], [1]], \
+            f"Initial state has incorrect dimensions: {self.initial_states[0].dims}"
+            
+        # Validate tensor product operations
+        test_op = tensor(sx, sx)
+        assert test_op.dims == [[2, 2], [2, 2]], f"Tensor product operation has incorrect dimensions: {test_op.dims}"
+        
         for i in range(num_batches):
             samp_z = np.random.uniform(1, 2.5, 1)[0]
             samp_x = np.random.uniform(1, 2.5, 1)[0]
-            self.H = (omega / 2 * sigmaz1 * samp_z) + (delta / 2 * sigmax1 * samp_x) + (omega / 2 * sigmaz2 * samp_z) + (delta / 2 * sigmax2 * samp_x) + (J * sigmax1 * sigmax2)
-            solve = lambda state : sesolve(self.H, state, self.total_time_steps, e_ops=[sigmax1, sigmax2, sigmaz1, sigmaz2], progress_bar=None)
+            
+            # Construct Hamiltonian with proper dimensions using QuTiP operations
+            H = (omega / 2 * samp_z * sigmaz1) + \
+                (delta / 2 * samp_x * sigmax1) + \
+                (omega / 2 * samp_z * sigmaz2) + \
+                (delta / 2 * samp_x * sigmax2) + \
+                (J * tensor(sx, sx))  # Proper way to represent the coupling term
+            
+            # Verify Hamiltonian dimensions
+            assert H.dims == [[2, 2], [2, 2]], f"Hamiltonian has incorrect dimensions: {H.dims}"
+            
+            # Ensure the Hamiltonian is Hermitian
+            assert H.isherm, "Hamiltonian is not Hermitian!"
+            
+            # QuTiP automatically handles the dimension compatibility between operators and states
+            solve = lambda state : sesolve(H, state, self.total_time_steps, 
+                                        e_ops=self.e_ops, progress_bar=None)
             all_states = [solve(state).expect for state in self.initial_states]
             states = [np.asarray(states, dtype='double') for states in all_states] 
             states = np.asarray([np.column_stack([state[0], state[1], state[2], state[3]]) for state in states])
