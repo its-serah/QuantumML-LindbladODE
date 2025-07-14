@@ -1,12 +1,10 @@
-# QNODE: Learning quantum dynamics using latent neural ODEs
+# QuantumML-LindbladODE: Quantum Dynamics with Neural Networks
 
-**Learning quantum dynamics using latent neural ODEs**
+**Learning quantum dynamics using latent neural ODEs and Lindblad equations**
 
-*Matthew Choi, Daniel Flam-Spepherd, Thi Ha Kyaw, Alán Aspuru-Guzik*
+*A quantum machine learning project exploring the intersection of quantum mechanics and neural networks*
 
-https://journals.aps.org/pra/abstract/10.1103/PhysRevA.105.042403
-
-https://arxiv.org/abs/2110.10721
+This project implements neural ordinary differential equations (NODEs) to learn and predict quantum system dynamics, with applications to both closed and open quantum systems governed by Lindblad equations.
 
 ## Samples
 <p align="center">
