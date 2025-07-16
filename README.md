@@ -189,11 +189,21 @@ cd QNODE
 pip install -r requirements.txt
 ```
 
+## Bibliography and References
+
+For a comprehensive list of research papers and theoretical foundations that support this work, see [BIBLIOGRAPHY.md](BIBLIOGRAPHY.md). This includes:
+
+- **Neural ODE foundations**: Chen et al. (2018), Rubanova et al. (2019)
+- **Quantum open systems**: Lindblad (1976), Breuer & Petruccione (2002)
+- **Amplitude damping theory**: Carmichael (1993), Wiseman & Milburn (2009)
+- **Machine learning for quantum systems**: Carleo & Troyer (2017), Torlai et al. (2018)
+- **Variational methods**: Kingma & Welling (2013), Rezende et al. (2014)
+
 ## Contact and References
 
 This project represents cutting-edge research in quantum machine learning, combining neural ordinary differential equations with quantum dynamics modeling. The work demonstrates the potential for ML approaches to complement traditional quantum theory in predicting and understanding quantum system behavior.
 
-For technical questions or collaboration opportunities, please refer to the associated research publications and documentation.
+For technical questions or collaboration opportunities, please refer to the associated research publications and documentation in the bibliography.
 
 ---
 
