@@ -1,12 +1,40 @@
-# Quantum Neural ODE (QNODE) - AI Learns Quantum Physics! 🚀
+# QuantumML Lindblad Sandbox
 
-## What Is This Project? (Simple Explanation)
+## Notice: This is a Documentation Sandbox
 
-Imagine you have a **quantum computer** (like the fancy ones Google and IBM make). These quantum systems are super fragile and lose energy over time - kind of like how a spinning top eventually slows down and stops.
+**This repository is a documentation sandbox fork.** For the complete, up-to-date project with full implementation, please visit the main repository:
 
-**The Problem**: Predicting how quantum systems behave is really hard math that takes forever to calculate.
+**👉 [Main Repository: its-serah/QuantumML-LindbladODE](https://github.com/its-serah/QuantumML-LindbladODE)**
 
-**Our Solution**: We taught an AI to watch quantum systems and learn their patterns, so it can predict what happens next - **much faster than traditional methods!**
+This sandbox contains:
+- **Interactive documentation website** (`index.html`) - Open this file to view comprehensive results
+- Complete visualization gallery with all PNG results and GIF animations
+- Detailed model specifications and technical documentation
+- Usage examples and implementation guidelines
+
+### 📖 View the Interactive Documentation
+
+To view the complete documentation with all results and technical details:
+
+1. **Clone this repository** (or download the files)
+2. **Open `index.html`** in your web browser
+3. **Browse the comprehensive documentation** with all visualizations
+
+Alternatively, you can serve it locally:
+```bash
+python3 -m http.server 8000
+# Then visit http://localhost:8000
+```
+
+---
+
+## What Is This Project?
+
+This project explores using Neural ODEs (Ordinary Differential Equations) to learn quantum system dynamics. Instead of solving complex quantum physics equations directly, we train AI models to predict how quantum systems evolve over time.
+
+**The Problem**: Traditional quantum dynamics simulations are computationally expensive and become prohibitive for large systems.
+
+**Our Solution**: Neural ODEs learn quantum evolution patterns from data, enabling faster predictions of quantum system behavior with high accuracy.
 
 ## What Does This Actually Do?
 
@@ -200,10 +228,20 @@ scipy >= 1.6.0
 
 ## Installation
 
+**For the complete implementation:**
 ```bash
-git clone https://github.com/[username]/QNODE.git
-cd QNODE
+# Clone the main repository
+git clone https://github.com/its-serah/QuantumML-LindbladODE.git
+cd QuantumML-LindbladODE
 pip install -r requirements.txt
+```
+
+**For this documentation sandbox:**
+```bash
+# Clone this sandbox for documentation and visualizations
+git clone https://github.com/MarkovianQ/quantumml-lindblad-sandbox.git
+cd quantumml-lindblad-sandbox
+# Open index.html to view interactive documentation
 ```
 
 ## Bibliography and References
