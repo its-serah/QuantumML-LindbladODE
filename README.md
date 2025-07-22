@@ -14,13 +14,15 @@ This sandbox contains:
 
 ### 📖 View the Interactive Documentation
 
-To view the complete documentation with all results and technical details:
+**🌐 [Live Documentation Website](https://markovianq.github.io/quantumml-lindblad-sandbox/)** - View the complete documentation online
+
+Alternatively, you can view it locally:
 
 1. **Clone this repository** (or download the files)
 2. **Open `index.html`** in your web browser
 3. **Browse the comprehensive documentation** with all visualizations
 
-Alternatively, you can serve it locally:
+Or serve it locally:
 ```bash
 python3 -m http.server 8000
 # Then visit http://localhost:8000
