@@ -104,8 +104,16 @@
                     <figure class="result-item">
                         <img src="pauli_expectation_AD.png" alt="Pauli Expectation Values for Amplitude Damping">
                         <figcaption>
-                            <h4>Pauli Expectation Values - Amplitude Damping</h4>
-                            <p>Neural ODE predictions vs theoretical Lindblad evolution for amplitude damping channel with γ = 0.02</p>
+                            <h4>Pauli Expectation Values - Ground State Initial Condition</h4>
+                            <p>Neural ODE predictions vs theoretical Lindblad evolution for amplitude damping channel with γ = 0.02, starting from |0⟩ state</p>
+                        </figcaption>
+                    </figure>
+
+                    <figure class="result-item">
+                        <img src="pauli_expectation_plus_state.png" alt="Pauli Expectation Values for Plus State">
+                        <figcaption>
+                            <h4>Pauli Expectation Values - Plus State Initial Condition</h4>
+                            <p>Neural ODE predictions vs theoretical Lindblad evolution starting from |+⟩ = (|0⟩ + |1⟩)/√2 state, showing different decay dynamics</p>
                         </figcaption>
                     </figure>
 
@@ -244,7 +252,8 @@
 ├── dataloader.py           # Quantum trajectory generation
 ├── experiments.py          # Training and evaluation
 ├── quick_demo.py           # Demonstration script
-├── pauli_expectation_values_AD.py  # Pauli analysis
+├── pauli_expectation_values_AD.py  # Ground state Pauli analysis
+├── pauli_expectation_plus_state.py # Plus state Pauli analysis
 ├── demo_results/           # Generated visualizations
 ├── gifs/                   # Dynamic evolution animations
 ├── saved_models/           # Pre-trained model checkpoints
