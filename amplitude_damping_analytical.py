@@ -25,6 +25,10 @@ from sklearn.metrics import mean_squared_error, r2_score
 import os
 from scipy.linalg import expm
 
+def to_device(tensor, device='cuda'):
+    """Move tensor to specified device"""
+    return tensor.to(device) if device == 'cuda' and torch.cuda.is_available() else tensor
+
 # Set up plotting style
 plt.style.use('seaborn-v0_8')
 sns.set_palette("husl")
@@ -147,9 +151,15 @@ class AnalyticalAmplitudeDamping:
 
 
 class EnhancedAmplitudeDampingAnalysis:
-    def __init__(self, gamma=0.02, time_end=6.0, num_points=300):
+    def __init__(self, gamma=0.02, time_end=6.0, num_points=300, use_gpu=None):
         """
         Initialize the enhanced amplitude damping analysis
+        
+        Args:
+            gamma: Amplitude damping rate
+            time_end: End time for analysis
+            num_points: Number of time points
+            use_gpu: Force GPU usage (True), force CPU usage (False), or auto-detect (None)
         """
         self.gamma = gamma
         self.time_end = time_end
@@ -158,7 +168,36 @@ class EnhancedAmplitudeDampingAnalysis:
         
         # Load pre-trained model
         print("Loading pre-trained neural ODE model...")
+        
+        # Determine device based on user preference and availability
+        if use_gpu is None:
+            # Auto-detect
+            self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+            print(f"Auto-detected device: {self.device}")
+        elif use_gpu:
+            # Force GPU
+            if torch.cuda.is_available():
+                self.device = 'cuda'
+                print(f"Using GPU as requested")
+            else:
+                print("WARNING: GPU requested but not available. Falling back to CPU.")
+                self.device = 'cpu'
+        else:
+            # Force CPU
+            self.device = 'cpu'
+            print(f"Using CPU as requested")
+        
+        if self.device == 'cuda':
+            print(f"GPU Device: {torch.cuda.get_device_name(0)}")
+            print(f"GPU Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")
+        
         self.data, self.model = load('open')
+        
+        # Move model to GPU if available
+        if self.device == 'cuda':
+            self.model = self.model.cuda()
+            print("Model moved to GPU")
+        
         print(f"Model loaded successfully. Training data shape: {self.data.total_expect_data.shape}")
         
         # Create output directory
@@ -218,14 +257,14 @@ class EnhancedAmplitudeDampingAnalysis:
         # This is needed because the model expects a trajectory, not just initial state
         num_train_steps = len(self.data.train_time_steps)
         initial_trajectory = torch.tensor(initial_state_bloch, dtype=torch.float32)
-        initial_trajectory = initial_trajectory.unsqueeze(0).unsqueeze(0).repeat(1, num_train_steps, 1)
+        initial_trajectory = to_device(initial_trajectory.unsqueeze(0).unsqueeze(0).repeat(1, num_train_steps, 1), self.device)
         
-        ts_train = torch.from_numpy(self.data.train_time_steps).float()
+        ts_train = to_device(torch.from_numpy(self.data.train_time_steps).float(), self.device)
         z0 = self.model.encode(initial_trajectory, ts_train)
         
-        ts_full = torch.from_numpy(self.time_points).float()
+        ts_full = to_device(torch.from_numpy(self.time_points).float(), self.device)
         prediction = self.model.decode(z0, ts_full)
-        return prediction.squeeze().numpy()
+        return prediction.cpu().squeeze().numpy()  # Move back to CPU for numpy conversion
     
     def create_comprehensive_comparison(self):
         """
@@ -449,9 +488,12 @@ The comparison validates the neural ODE approach for quantum system modeling.
         print("Technical report saved!")
 
 
-def main():
+def main(use_gpu=None):
     """
     Main execution function
+    
+    Args:
+        use_gpu: Force GPU usage (True), force CPU usage (False), or auto-detect (None)
     """
     print("="*60)
     print("ENHANCED AMPLITUDE DAMPING ANALYSIS")
@@ -459,7 +501,7 @@ def main():
     print("="*60)
     
     # Initialize analysis
-    analysis = EnhancedAmplitudeDampingAnalysis(gamma=0.02)
+    analysis = EnhancedAmplitudeDampingAnalysis(gamma=0.02, use_gpu=use_gpu)
     
     # Run comprehensive comparison
     analysis.create_comprehensive_comparison()
@@ -478,4 +520,17 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Amplitude Damping Analysis')
+    parser.add_argument('--gpu', action='store_true', help='Force GPU usage')
+    parser.add_argument('--cpu', action='store_true', help='Force CPU usage')
+    
+    args = parser.parse_args()
+    
+    if args.gpu and args.cpu:
+        print("ERROR: Cannot specify both --gpu and --cpu")
+        exit(1)
+    
+    use_gpu = True if args.gpu else (False if args.cpu else None)
+    main(use_gpu=use_gpu)
