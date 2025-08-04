@@ -124,22 +124,33 @@ QNODE/
     └── open_6_53_53_0.007*     # Model files for amplitude damping
 ```
 
-## Key Features
+## New Features: GPU/CPU Flexibility
 
-### 1. Quantum Trajectory Generation
-- **Stochastic simulation** of quantum measurement processes
-- **Monte Carlo sampling** of quantum trajectories
-- **Amplitude damping channel** implementation with configurable parameters
+We've added flexibility to run the code using either the CPU or GPU. This ensures faster computations on systems with a compatible GPU.
 
-### 2. Neural ODE Training
-- **Variational autoencoder** framework for latent representation learning
-- **Continuous-time modeling** using neural ordinary differential equations
-- **Adaptive learning rates** and regularization techniques
+### Running the Analysis
 
-### 3. Performance Evaluation
-- **Comparison with theoretical Lindblad predictions**
-- **Trajectory fidelity metrics** (correlation, MSE, trend analysis)
-- **Visualization tools** for quantum state evolution
+You can now specify whether to run the analysis on a CPU or GPU using command-line arguments:
+
+- **Auto-detect** (default):
+  ```bash
+  python3 amplitude_damping_analytical.py
+  ```
+  The system will automatically use GPU if available, otherwise it will fall back to the CPU.
+
+- **Force use of GPU**:
+  ```bash
+  python3 amplitude_damping_analytical.py --gpu
+  ```
+  This will attempt to run the operations on the GPU. If the GPU is unavailable, it will warn and use the CPU.
+
+- **Force use of CPU**:
+  ```bash
+  python3 amplitude_damping_analytical.py --cpu
+  ```
+  Forces the computations to be performed exclusively on the CPU, regardless of GPU availability.
+
+Using these options ensures the best performance for various hardware setups!
 
 ## Usage
 
